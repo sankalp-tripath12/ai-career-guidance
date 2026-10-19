@@ -1,0 +1,4 @@
+cd /Users/sankalptripathi/App_Development-Project/ai-career-guidance/frontend
+rep -n 'const careers' src/App.jsx
+grep -n 'function App' src/App.jsx
+grep -n 'export default App' src/App.jsx
