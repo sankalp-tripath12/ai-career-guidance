@@ -1,33 +1,6 @@
 import { useState } from 'react'
 import './App.css'
 
-const careers = {
-  technology: {
-    title: 'Software Developer',
-    description: 'Build websites and applications.',
-    skills: ['JavaScript', 'Problem solving', 'Git'],
-    steps: ['Learn JavaScript', 'Build a website', 'Practice coding'],
-  },
-  design: {
-    title: 'UI/UX Designer',
-    description: 'Design user-friendly digital products.',
-    skills: ['Figma', 'Visual design', 'User research'],
-    steps: ['Learn design principles', 'Practice with Figma', 'Build a portfolio'],
-  },
-  business: {
-    title: 'Business Analyst',
-    description: 'Use data to solve business problems.',
-    skills: ['Excel', 'Communication', 'Data analysis'],
-    steps: ['Learn Excel', 'Analyse data', 'Complete a small project'],
-  },
-  healthcare: {
-    title: 'Healthcare Professional',
-    description: 'Explore careers focused on health and wellbeing.',
-    skills: ['Subject knowledge', 'Communication', 'Critical thinking'],
-    steps: ['Research courses', 'Check qualifications', 'Explore training'],
-  },
-}
-
 function App() {
   const [form, setForm] = useState({
     name: '',
@@ -35,15 +8,49 @@ function App() {
     interest: '',
   })
   const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   function handleChange(event) {
     const { name, value } = event.target
     setForm(previous => ({ ...previous, [name]: value }))
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    setResult(careers[form.interest])
+    setLoading(true)
+    setError('')
+    setResult(null)
+
+    try {
+      const response = await fetch(
+        'http://localhost:5001/api/careers/recommend',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ interest: form.interest }),
+        }
+      )
+
+      const payload = await response.json()
+
+      if (!response.ok) {
+        throw new Error(payload.message || 'Could not get a recommendation.')
+      }
+
+      setResult({
+        ...payload.data,
+        steps: payload.data.nextSteps,
+      })
+    } catch (err) {
+      setError(
+        err.message === 'Failed to fetch'
+          ? 'Cannot reach the career server. Make sure the backend is running on port 5001.'
+          : err.message
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -70,6 +77,8 @@ function App() {
           <p className="eyebrow">CAREER ASSESSMENT</p>
           <h2>Tell us about yourself</h2>
           <p>Answer three questions to receive a career suggestion.</p>
+
+          {error && <p className="error-message" role="alert">{error}</p>}
 
           <form onSubmit={handleSubmit}>
             <label>
@@ -107,8 +116,8 @@ function App() {
               </select>
             </label>
 
-            <button className="primary-button" type="submit">
-              Get My Recommendation →
+            <button className="primary-button" type="submit" disabled={loading}>
+              {loading ? 'Getting Recommendation...' : 'Get My Recommendation →'}
             </button>
           </form>
         </section>
