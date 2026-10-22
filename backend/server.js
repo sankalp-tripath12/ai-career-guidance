@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
+const connectDB = require("./config/db");
 const careerRoutes = require("./routes/careerRoutes");
 
 const app = express();
@@ -19,6 +20,17 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/careers", careerRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Career Guidance API running at http://localhost:${PORT}`);
-});
+async function startServer() {
+  try {
+    await connectDB();
+
+    app.listen(PORT, () => {
+      console.log(`Career Guidance API running at http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to connect to MongoDB:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();

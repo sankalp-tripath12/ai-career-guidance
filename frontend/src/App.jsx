@@ -7,6 +7,7 @@ function App() {
     education: '',
     interest: '',
   })
+
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -28,19 +29,26 @@ function App() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ interest: form.interest }),
+          body: JSON.stringify({
+            name: form.name,
+            education: form.education,
+            interest: form.interest,
+          }),
         }
       )
 
       const payload = await response.json()
 
       if (!response.ok) {
-        throw new Error(payload.message || 'Could not get a recommendation.')
+        throw new Error(
+          payload.message || 'Could not get a recommendation.'
+        )
       }
 
       setResult({
         ...payload.data,
         steps: payload.data.nextSteps,
+        assessmentId: payload.assessmentId,
       })
     } catch (err) {
       setError(
@@ -56,14 +64,18 @@ function App() {
   return (
     <div className="app">
       <header className="navbar">
-        <a className="brand" href="#home">PathPilot<span>.</span></a>
+        <a className="brand" href="#home">
+          PathPilot<span>.</span>
+        </a>
         <a href="#assessment">Career Assessment</a>
       </header>
 
       <main>
         <section className="hero" id="home">
           <p className="eyebrow">YOUR FUTURE STARTS HERE</p>
-          <h1>Find a career that fits <span>your interests.</span></h1>
+          <h1>
+            Find a career that fits <span>your interests.</span>
+          </h1>
           <p>
             Explore career options and discover the skills you can develop
             to move towards your goals.
@@ -78,7 +90,11 @@ function App() {
           <h2>Tell us about yourself</h2>
           <p>Answer three questions to receive a career suggestion.</p>
 
-          {error && <p className="error-message" role="alert">{error}</p>}
+          {error && (
+            <p className="error-message" role="alert">
+              {error}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit}>
             <label>
@@ -94,8 +110,12 @@ function App() {
 
             <label>
               Education level
-              <select name="education" value={form.education}
-                onChange={handleChange} required>
+              <select
+                name="education"
+                value={form.education}
+                onChange={handleChange}
+                required
+              >
                 <option value="">Choose education</option>
                 <option>School student</option>
                 <option>Undergraduate</option>
@@ -106,8 +126,12 @@ function App() {
 
             <label>
               Main area of interest
-              <select name="interest" value={form.interest}
-                onChange={handleChange} required>
+              <select
+                name="interest"
+                value={form.interest}
+                onChange={handleChange}
+                required
+              >
                 <option value="">Choose an interest</option>
                 <option value="technology">Technology and coding</option>
                 <option value="design">Design and creativity</option>
@@ -116,8 +140,14 @@ function App() {
               </select>
             </label>
 
-            <button className="primary-button" type="submit" disabled={loading}>
-              {loading ? 'Getting Recommendation...' : 'Get My Recommendation →'}
+            <button
+              className="primary-button"
+              type="submit"
+              disabled={loading}
+            >
+              {loading
+                ? 'Getting Recommendation...'
+                : 'Get My Recommendation →'}
             </button>
           </form>
         </section>
@@ -130,18 +160,30 @@ function App() {
             <article className="career-card">
               <h3>{result.title}</h3>
               <p>{result.description}</p>
-              <p><strong>Education:</strong> {form.education}</p>
+              <p>
+                <strong>Education:</strong> {form.education}
+              </p>
 
               <h4>Skills to develop</h4>
               <ul>
-                {result.skills.map(skill => <li key={skill}>{skill}</li>)}
+                {result.skills.map(skill => (
+                  <li key={skill}>{skill}</li>
+                ))}
               </ul>
 
               <h4>Recommended next steps</h4>
               <ol>
-                {result.steps.map(step => <li key={step}>{step}</li>)}
+                {result.steps.map(step => (
+                  <li key={step}>{step}</li>
+                ))}
               </ol>
             </article>
+
+            {result.assessmentId && (
+              <p className="disclaimer">
+                Your assessment has been saved successfully.
+              </p>
+            )}
 
             <p className="disclaimer">
               This is a basic interest-based suggestion, not a guarantee
@@ -152,7 +194,9 @@ function App() {
       </main>
 
       <footer>
-        <a className="brand" href="#home">PathPilot<span>.</span></a>
+        <a className="brand" href="#home">
+          PathPilot<span>.</span>
+        </a>
         <p>Explore your interests. Build your future.</p>
       </footer>
     </div>
