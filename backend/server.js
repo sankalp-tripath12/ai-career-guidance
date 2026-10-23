@@ -1,6 +1,23 @@
+
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path");
+const fs = require("fs");
+
+const userDataDirectory = process.env.PATHPILOT_USER_DATA;
+
+const localEnvPath = userDataDirectory
+  ? path.join(userDataDirectory, ".env")
+  : null;
+
+const developmentEnvPath = path.join(__dirname, ".env");
+
+const envPath =
+  localEnvPath && fs.existsSync(localEnvPath)
+    ? localEnvPath
+    : developmentEnvPath;
+
+require("dotenv").config({ path: envPath });
 
 const connectDB = require("./config/db");
 const careerRoutes = require("./routes/careerRoutes");

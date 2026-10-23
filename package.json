@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently -k \"npm run dev --prefix frontend\" \"wait-on http://localhost:5173 && ELECTRON_START_URL=http://localhost:5173 electron .\"",
     "build:frontend": "npm run build --prefix frontend",
-    "start:desktop": "electron ."
+    "start:desktop": "electron .",
+    "pack:mac": "npm run build:frontend && electron-builder --mac dir",
+    "dist:mac": "npm run build:frontend && electron-builder --mac dmg"
   },
   "repository": {
     "type": "git",
@@ -24,6 +26,53 @@
   "devDependencies": {
     "concurrently": "^10.0.6",
     "electron": "^45.0.0",
+    "electron-builder": "^26.15.3",
     "wait-on": "^9.5.1"
+  },
+  "build": {
+    "appId": "com.pathpilot.desktop",
+    "productName": "PathPilot",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "frontend/dist/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!node_modules/**/node_modules/**",
+          "!node_modules/nodemon/**",
+          "!node_modules/.bin/**",
+          "!.env",
+          "!.env.*",
+          "!**/.env",
+          "!**/.env.*"
+        ]
+      },
+      {
+        "from": "backend/node_modules",
+        "to": "backend/node_modules",
+        "filter": [
+          "**/*",
+          "!nodemon/**",
+          "!**/nodemon/**",
+          "!.bin/**",
+          "!**/.bin/**"
+        ]
+      }
+    ],
+    "mac": {
+      "target": [
+        "dir",
+        "dmg"
+      ],
+      "category": "public.app-category.education"
+    }
   }
 }

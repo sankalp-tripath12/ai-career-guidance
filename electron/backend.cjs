@@ -1,8 +1,17 @@
 const { fork } = require("child_process");
 const path = require("path");
 const http = require("http");
+const { app } = require("electron");
 
 let backendProcess = null;
+
+function getBackendDirectory() {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, "backend");
+  }
+
+  return path.join(__dirname, "../backend");
+}
 
 function checkBackendHealth() {
   return new Promise((resolve) => {
@@ -45,7 +54,7 @@ async function startBackend() {
     return waitForBackend();
   }
 
-  const backendDirectory = path.join(__dirname, "../backend");
+  const backendDirectory = getBackendDirectory();
 
   backendProcess = fork(
     path.join(backendDirectory, "server.js"),
@@ -55,6 +64,7 @@ async function startBackend() {
       env: {
         ...process.env,
         PORT: "5001",
+        PATHPILOT_USER_DATA: path.join(app.getPath("appData"), "PathPilot"),
       },
       stdio: ["ignore", "inherit", "inherit", "ipc"],
     }

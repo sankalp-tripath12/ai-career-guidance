@@ -5,19 +5,41 @@ async function getCareerRecommendation(req, res) {
   try {
     const { name, education, interest } = req.body || {};
 
-    if (!name || !education || !interest) {
+    if (
+      typeof name !== "string" ||
+      typeof education !== "string" ||
+      typeof interest !== "string" ||
+      !name.trim() ||
+      !education.trim() ||
+      !interest.trim()
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Name, education, and interest are required.",
+        message: "Please provide your name, education, and career interest.",
       });
     }
 
-    const recommendation = recommendCareer(interest);
+    const cleanName = name.trim();
+    const cleanEducation = education.trim();
+    const cleanInterest = interest.trim();
+
+    if (
+      cleanName.length > 100 ||
+      cleanEducation.length > 200 ||
+      cleanInterest.length > 100
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please shorten your name, education, or career interest.",
+      });
+    }
+
+    const recommendation = recommendCareer(cleanInterest);
 
     const assessment = await Assessment.create({
-      name,
-      education,
-      interest,
+      name: cleanName,
+      education: cleanEducation,
+      interest: cleanInterest,
       careerTitle: recommendation.title,
       description: recommendation.description,
       skills: recommendation.skills,
