@@ -7,3 +7,15 @@ backend/.env
 .env.*
 !.env.example
 .DS_Store
+
+# Local backup files
+*.backup
+*.before-*
+
+# Generated desktop builds
+release/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
